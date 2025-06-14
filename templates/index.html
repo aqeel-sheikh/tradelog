@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Solo TradeLog</title>
+</head>
+<body>
+    <h1>Your Trades</h1>
+    <ul>
+        {% for trade in trades %}
+            <li>{{ trade }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
