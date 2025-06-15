@@ -1,14 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Solo TradeLog</title>
+    <title>Trade Log</title>
+    
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 <body>
-    <h1>Your Trades</h1>
-    <ul>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for message in messages %}
+            <li style="color: red;">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    <h1>Log a Trade</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        {{ form.stock.label }} {{ form.stock() }}<br>
+        {{ form.date_time.label }} {{ form.date_time(type="datetime-local") }}<br>
+        {{ form.bias.label }} {{ form.bias() }}<br>
+        {{ form.position_size.label }} {{ form.position_size() }}<br>
+        {{ form.entry_reason.label }} {{ form.entry_reason() }}<br>
+        {{ form.exit_reason.label }} {{ form.exit_reason() }}<br>
+        {{ form.outcome.label }} {{ form.outcome() }}<br>
+        {{ form.rr.label }} {{ form.rr() }}<br>
+        {{ form.notes.label }} {{ form.notes() }}<br>
+        {{ form.emotion.label }} {{ form.emotion() }}<br>
+        {{ form.trading_plan.label }} {{ form.trading_plan() }}<br>
+        {{ form.balance.label }} {{ form.balance() }}<br>
+        {{ form.pnl.label }} {{ form.pnl() }}<br>
+        {{ form.submit() }}
+    </form>
+
+    <h2>Trade History</h2>
+    <div class="table-wrapper">
+    <table border="1">
+        <tr>
+            <th>Stock</th>
+            <th>Date & Time</th>
+            <th>Bias</th>
+            <th>Position Size</th>
+            <th>Entry Reason</th>
+            <th>Exit Reason</th>
+            <th>Outcome</th>
+            <th>RR</th>
+            <th>Notes</th>
+            <th>Emotion</th>
+            <th>Trading Plan</th>
+            <th>Balance</th>
+            <th>PNL</th>
+            <th>Delete</th>
+            <th>Edit</th>
+        </tr>
         {% for trade in trades %}
-            <li>{{ trade }}</li>
+        <tr>
+        {% if request.args.get('edit_id') and request.args.get('edit_id')|int == trade[0] %}
+            <form method="POST" action="?edit_id={{ trade[0] }}" class="inline-edit-form">
+                <td><input type="text" name="stock" value="{{ trade[1] }}"></td>
+                <td><input type="datetime-local" name="date_time" value="{{ trade[2] }}"></td>
+                <td><input type="text" name="bias" value="{{ trade[3] }}"></td>
+                <td><input type="number" step="0.01" name="position_size" value="{{ trade[4] }}"></td>
+                <td><input type="text" name="entry_reason" value="{{ trade[5] }}"></td>
+                <td><input type="text" name="exit_reason" value="{{ trade[6] }}"></td>
+                <td><input type="text" name="outcome" value="{{ trade[7] }}"></td>
+                <td><input type="number" step="0.01" name="rr" value="{{ trade[8] }}"></td>
+                <td><input type="text" name="notes" value="{{ trade[9] }}"></td>
+                <td><input type="text" name="emotion" value="{{ trade[10] }}"></td>
+                <td><input type="text" name="trading_plan" value="{{ trade[11] }}"></td>
+                <td><input type="number" step="0.01" name="balance" value="{{ trade[12] }}"></td>
+                <td><input type="number" step="0.01" name="pnl" value="{{ trade[13] }}"></td>
+                <td><a href="/delete/{{ trade[0] }}"> Delete </a></td>
+                <td class="inline-edit-btns">
+                    <input type="submit" value="Save">
+                    <a href="{{ url_for('index') }}">Cancel</a>
+                </td>
+            </form>
+        {% else %}
+            <td>{{ trade[1] }}</td>
+            <td>{{ trade[2] }}</td>
+            <td>{{ trade[3] }}</td>
+            <td>{{ trade[4] }}</td>
+            <td>{{ trade[5] }}</td>
+            <td>{{ trade[6] }}</td>
+            <td>{{ trade[7] }}</td>
+            <td>{{ trade[8] }}</td>
+            <td>{{ trade[9] }}</td>
+            <td>{{ trade[10] }}</td>
+            <td>{{ trade[11] }}</td>
+            <td>{{ trade[12] }}</td>
+            <td>{{ trade[13] }}</td>
+            <td><a href="/delete/{{ trade[0] }}"> Delete </a></td>
+            <td><a href="{{ url_for('index', edit_id=trade[0]) }}"> Edit </a></td>
+        {% endif %}
+        </tr>
         {% endfor %}
-    </ul>
+    </table>
+    </div>
 </body>
 </html>
