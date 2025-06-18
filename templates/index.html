@@ -18,13 +18,7 @@
             {% for field in form if field.name != 'csrf_token' and field.name != 'submit' %}
                 <div>
                     <label class="block font-medium mb-1">{{ field.label }}</label>
-                    
-                    {% if field.name == 'date_time' %}
-                        <input type="datetime-local" name="date_time" class="w-full p-2 border rounded">
-                    {% else %}
-                        {{ field(class_='w-full p-2 border rounded') }}
-                    {% endif %}
-
+                    {{ field(class_='w-full p-2 border rounded') }}
                     {% for error in field.errors %}
                         <p class="text-red-500 text-sm mt-1">{{ error }}</p>
                     {% endfor %}
