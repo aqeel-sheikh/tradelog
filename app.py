@@ -40,7 +40,7 @@ def index():
             trade = Trade.query.get(int(edit_id))
             if trade and trade.user_id == current_user.id:
                 trade.stock = request.form.get('stock')
-                trade.date_time = request.form.get('date_time')
+                trade.date_time = datetime.strptime(request.form.get('date_time'), '%Y-%m-%dT%H:%M')
                 trade.bias = request.form.get('bias')
                 trade.position_size = request.form.get('position_size')
                 trade.entry_reason = request.form.get('entry_reason')
