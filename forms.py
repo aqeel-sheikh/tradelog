@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import (DecimalField, StringField, SubmitField, SelectField, DateTimeField,
+from wtforms import (DecimalField, StringField, SubmitField, SelectField, DateTimeLocalField,
                      PasswordField)
 from wtforms.validators import DataRequired, NumberRange, Email, Length, EqualTo
 
 class TradeLogForm(FlaskForm):
     stock = StringField('Stock', validators=[DataRequired()])
-    date_time = DateTimeField('Date & Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()] )
+    date_time = DateTimeLocalField('Date & Time', format='%Y-%m-%dT%H:%M', validators=[DataRequired()] )
     bias = SelectField('Bias', choices=[('Buy'), ('Sell')], validators=[DataRequired()])
     position_size = DecimalField('Position Size', validators=[DataRequired(),NumberRange(min=0)])
     entry_reason = StringField('Entry Reason', validators=[DataRequired()])

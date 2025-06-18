@@ -20,6 +20,7 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
 # Landing Page
 @app.route('/')
 def landing():
@@ -68,7 +69,7 @@ def index():
                     return redirect(url_for('index'))
             new_trade = Trade(
                 stock=form.stock.data,
-                date_time=form.date_time.data.strftime('%Y-%m-%dT%H:%M'),
+                date_time=form.date_time.data,
                 bias=form.bias.data,
                 position_size=form.position_size.data,
                 entry_reason=form.entry_reason.data,

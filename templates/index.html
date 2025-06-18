@@ -69,7 +69,7 @@
                 <form method="POST" action="?edit_id={{ trade.id }}">
                     <td><input type="text" name="stock" value="{{ trade.stock }}" class="w-full p-1 border rounded"></td>
                     <td>
-                        <input type="datetime-local" name="date_time" value="{{ trade.date_time.strftime('%Y-%m-%dT%H:%M') }}" class="w-full p-1 border rounded">
+                        <input type="datetime-local" name="date_time" value="{{ trade.date_time.strftime('%Y-%m-%dT%H:%M') if trade.date_time and trade.date_time.__class__.__name__ != 'str' else trade.date_time }}" class="w-full p-1 border rounded">
                     </td>
                     <td><input type="text" name="bias" value="{{ trade.bias }}" class="w-full p-1 border rounded"></td>
                     <td><input type="number" name="position_size" value="{{ trade.position_size }}" class="w-full p-1 border rounded"></td>
