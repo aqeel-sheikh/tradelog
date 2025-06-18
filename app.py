@@ -36,53 +36,61 @@ def index():
     trades = Trade.query.filter_by(user_id=current_user.id).all()
     # Inline edit POST
     if request.method == 'POST' and edit_id:
-        trade = Trade.query.get(int(edit_id))
-        if trade and trade.user_id == current_user.id:
-            trade.stock = request.form.get('stock')
-            trade.date_time = request.form.get('date_time')
-            trade.bias = request.form.get('bias')
-            trade.position_size = request.form.get('position_size')
-            trade.entry_reason = request.form.get('entry_reason')
-            trade.exit_reason = request.form.get('exit_reason')
-            trade.outcome = request.form.get('outcome')
-            trade.rr = request.form.get('rr')
-            trade.notes = request.form.get('notes')
-            trade.emotion = request.form.get('emotion')
-            trade.trading_plan = request.form.get('trading_plan')
-            trade.balance = request.form.get('balance')
-            trade.pnl = request.form.get('pnl')
-            db.session.commit()
-            flash('Trade updated successfully!')
-            return redirect(url_for('index'))
+        try:
+            trade = Trade.query.get(int(edit_id))
+            if trade and trade.user_id == current_user.id:
+                trade.stock = request.form.get('stock')
+                trade.date_time = request.form.get('date_time')
+                trade.bias = request.form.get('bias')
+                trade.position_size = request.form.get('position_size')
+                trade.entry_reason = request.form.get('entry_reason')
+                trade.exit_reason = request.form.get('exit_reason')
+                trade.outcome = request.form.get('outcome')
+                trade.rr = request.form.get('rr')
+                trade.notes = request.form.get('notes')
+                trade.emotion = request.form.get('emotion')
+                trade.trading_plan = request.form.get('trading_plan')
+                trade.balance = request.form.get('balance')
+                trade.pnl = request.form.get('pnl')
+                db.session.commit()
+                flash('Trade updated successfully!', 'success')
+                return redirect(url_for('index'))
+        except Exception as e:
+            db.session.rollback()
+            flash('An error occurred while updating the trade.', 'error')
     # Add new trade with free user limit
     if form.validate_on_submit() and not edit_id:
-        if not current_user.is_premium:
-            trade_count = Trade.query.filter_by(user_id=current_user.id).count()
-            if trade_count >= 20:
-                flash('Free users can only add up to 20 trades. Upgrade to premium for unlimited trades!')
-                return redirect(url_for('index'))
-        new_trade = Trade(
-            stock=form.stock.data,
-            date_time=form.date_time.data.strftime('%Y-%m-%dT%H:%M'),
-            bias=form.bias.data,
-            position_size=form.position_size.data,
-            entry_reason=form.entry_reason.data,
-            exit_reason=form.exit_reason.data,
-            outcome=form.outcome.data,
-            rr=form.rr.data,
-            notes=form.notes.data,
-            emotion=form.emotion.data,
-            trading_plan=form.trading_plan.data,
-            balance=form.balance.data,
-            pnl=form.pnl.data,
-            user_id=current_user.id  # Associate trade with logged-in user
-        )
-        db.session.add(new_trade)
-        db.session.commit()
-        flash('Trade logged successfully!')
-        return redirect(url_for('index'))
+        try:
+            if not current_user.is_premium:
+                trade_count = Trade.query.filter_by(user_id=current_user.id).count()
+                if trade_count >= 20:
+                    flash('Free users can only add up to 20 trades. Upgrade to premium for unlimited trades!', 'error')
+                    return redirect(url_for('index'))
+            new_trade = Trade(
+                stock=form.stock.data,
+                date_time=form.date_time.data.strftime('%Y-%m-%dT%H:%M'),
+                bias=form.bias.data,
+                position_size=form.position_size.data,
+                entry_reason=form.entry_reason.data,
+                exit_reason=form.exit_reason.data,
+                outcome=form.outcome.data,
+                rr=form.rr.data,
+                notes=form.notes.data,
+                emotion=form.emotion.data,
+                trading_plan=form.trading_plan.data,
+                balance=form.balance.data,
+                pnl=form.pnl.data,
+                user_id=current_user.id
+            )
+            db.session.add(new_trade)
+            db.session.commit()
+            flash('Trade logged successfully!', 'success')
+            return redirect(url_for('index'))
+        except Exception as e:
+            db.session.rollback()
+            flash('An error occurred while logging the trade.', 'error')
     if form.errors:
-        flash(str(form.errors))
+        flash(str(form.errors), 'error')
     return render_template('index.html', trades=trades, form=form)
 
 # Delete Route
@@ -204,6 +212,18 @@ def dashboard():
         avg_rr=avg_rr,
         last_trade=last_trade
     )
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('403.html'), 403
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    return render_template('500.html'), 500
 
 if __name__ == '__main__':
     with app.app_context():

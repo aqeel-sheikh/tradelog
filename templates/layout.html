@@ -42,15 +42,16 @@
     </nav>
 
     <!-- Flash messages -->
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="w-full max-w-xl mx-auto mt-4">
-          {% for message in messages %}
-            <div class="bg-red-100 text-red-800 border border-red-300 px-4 py-2 rounded-md mb-2">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
+          <ul class="list-disc pl-5">
+            {% for category, message in messages %}
+              <li class="{% if category == 'success' %}text-green-600{% else %}text-red-600{% endif %}">
+                {{ message }}
+              </li>
+            {% endfor %}
+          </ul>
       {% endif %}
     {% endwith %}
 
