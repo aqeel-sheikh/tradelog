@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold mb-2">📊 Your Trading Dashboard</h2>
+        <p class="text-gray-600 mb-6">Quick summary of your trading performance</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-semibold text-gray-700">Total Trades</h3>
+            <p class="text-2xl text-blue-600 font-bold">{{ total_trades }}</p>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-semibold text-gray-700">Total PNL</h3>
+            <p class="text-2xl text-green-600 font-bold">₹{{ total_pnl }}</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-semibold text-gray-700">Win Rate</h3>
+            <p class="text-2xl text-yellow-600 font-bold">{{ win_rate }}%</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-semibold text-gray-700">Avg R:R</h3>
+            <p class="text-2xl text-purple-600 font-bold">{{ avg_rr }}</p>
+        </div>
+    </div>
+
+    <div class="mt-8 bg-white p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold mb-2 text-gray-700">🕒 Last Trade</h3>
+        {% if last_trade %}
+  <div class="bg-white p-4 rounded shadow mt-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-2">Last Trade Details</h2>
+    <p><strong>Stock:</strong> {{ last_trade.stock }}</p>
+    <p><strong>Date:</strong> {{ last_trade.date_time }}</p>
+    <p><strong>Bias:</strong> {{ last_trade.bias }}</p>
+    <p><strong>Position Size:</strong> {{ last_trade.position_size }}</p>
+    <p><strong>Entry Reason:</strong> {{ last_trade.entry_reason }}</p>
+    <p><strong>Exit Reason:</strong> {{ last_trade.exit_reason }}</p>
+    <p><strong>Outcome:</strong> {{ last_trade.outcome }}</p>
+    <p><strong>RR:</strong> {{ last_trade.rr }}</p>
+    <p><strong>Notes:</strong> {{ last_trade.notes }}</p>
+    <p><strong>Emotion:</strong> {{ last_trade.emotion }}</p>
+    <p><strong>Plan Followed:</strong> {{ last_trade.trading_plan }}</p>
+    <p><strong>Balance:</strong> {{ last_trade.balance }}</p>
+    <p><strong>PNL:</strong> {{ last_trade.pnl }}</p>
+  </div>
+{% else %}
+  <p class="text-gray-600 italic mt-6">No trades yet.</p>
+{% endif %}
+
+    </div>
+{% endblock %}
