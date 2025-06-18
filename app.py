@@ -4,10 +4,10 @@ from flask_bcrypt import Bcrypt
 from models import db, Trade, User
 from forms import TradeLogForm, RegisterForm, LoginForm
 from datetime import datetime
-import csv
+import csv, os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '18a1de63b63512e88a94fec66b2c5653'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -225,7 +225,8 @@ def not_found(e):
 def server_error(e):
     return render_template('500.html'), 500
 
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
