@@ -8,7 +8,7 @@ import csv, os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -228,6 +228,15 @@ def server_error(e):
 
 with app.app_context():
     db.create_all()
+'''
+@app.route('/become_admin')
+@login_required
+def become_admin():
+    current_user.is_admin = True
+    db.session.commit()
+    flash("You are now an admin!", "success")
+    return redirect(url_for('admin'))
 
+'''
 if __name__ == '__main__':
     app.run(debug=True)
