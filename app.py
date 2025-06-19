@@ -237,7 +237,7 @@ def server_error(e):
 
 with app.app_context():
     db.create_all()
-'''
+
 @app.route('/become_admin')
 @login_required
 def become_admin():
@@ -246,6 +246,5 @@ def become_admin():
     flash("You are now an admin!", "success")
     return redirect(url_for('admin'))
 
-'''
 if __name__ == '__main__':
     app.run(debug=True)
