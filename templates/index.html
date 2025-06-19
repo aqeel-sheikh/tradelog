@@ -2,111 +2,112 @@
 
 {% block content %}
 <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">📘 Trade Journal</h1>
+  <h1 class="text-3xl font-extrabold text-[var(--primary-color)] tracking-tight">📘 Trade Journal</h1>
 </div>
 
 <!-- Collapsible Trade Form -->
 <div x-data="{ open: false }" class="mb-6">
-    <button @click="open = !open" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-        <span x-text="open ? 'Hide Trade Form' : '➕ Log a Trade'"></span>
+  <div class="flex justify-center">
+    <button @click="open = !open"
+      class="bg-[var(--button-bg)] hover:bg-[var(--button-hover)] text-white font-semibold py-2 px-6 rounded-full transition-transform transform hover:scale-105 shadow-md">
+      <span x-text="open ? '✖️ Cancel' : '➕ Log a Trade'"></span>
     </button>
+  </div>
 
-    <div x-show="open" x-transition class="mt-4">
-        <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded shadow">
-            {{ form.hidden_tag() }}
+  <div x-show="open" x-transition class="mt-4 bg-[var(--form-bg)] p-6 rounded shadow-md border">
+    <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {{ form.hidden_tag() }}
 
-            {% for field in form if field.name != 'csrf_token' and field.name != 'submit' %}
-                <div>
-                    <label class="block font-medium mb-1">{{ field.label }}</label>
-                    {{ field(class_='w-full p-2 border rounded') }}
-                    {% for error in field.errors %}
-                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endfor %}
+      {% for field in form if field.name != 'csrf_token' and field.name != 'submit' %}
+        <div>
+          <label class="block font-medium mb-1">{{ field.label }}</label>
+          {{ field(class_='w-full p-2 border rounded') }}
+          {% for error in field.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endfor %}
 
-            <div class="md:col-span-2">
-                {{ form.submit(class_='bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700') }}
-            </div>
-        </form>
-    </div>
+      <div class="md:col-span-2">
+        {{ form.submit(class_='bg-[var(--button-bg)] text-white px-4 py-2 rounded hover:bg-[var(--button-hover)]') }}
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- Trade History Table -->
-<h2 class="text-xl font-semibold mb-2">Trade History</h2>
+<h2 class="text-xl font-semibold mb-2 text-[var(--primary-color)]">Trade History</h2>
 
 <div class="overflow-x-auto bg-white shadow rounded mt-4">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-100 text-sm font-semibold text-gray-700 text-left">
-            <tr>
-                <th class="px-4 py-2">Stock</th>
-                <th class="px-4 py-2">Date & Time</th>
-                <th class="px-4 py-2">Bias</th>
-                <th class="px-4 py-2">Position Size</th>
-                <th class="px-4 py-2">Entry Reason</th>
-                <th class="px-4 py-2">Exit Reason</th>
-                <th class="px-4 py-2">Outcome</th>
-                <th class="px-4 py-2">RR</th>
-                <th class="px-4 py-2">Notes</th>
-                <th class="px-4 py-2">Mental State/Emotions</th>
-                <th class="px-4 py-2">Trading Plan</th>
-                <th class="px-4 py-2">Balance</th>
-                <th class="px-4 py-2">PNL</th>
-                <th class="px-4 py-2">Delete</th>
-                <th class="px-4 py-2">Edit</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-        {% for trade in trades %}
-            {% if request.args.get('edit_id') and request.args.get('edit_id')|int == trade.id %}
-                <tr class="bg-yellow-50">
-                <form method="POST" action="?edit_id={{ trade.id }}">
-                    <td><input type="text" name="stock" value="{{ trade.stock }}" class="w-full p-1 border rounded"></td>
-                    <td>
-                        <input type="datetime-local" name="date_time" value="{{ trade.date_time.strftime('%Y-%m-%dT%H:%M') if trade.date_time and trade.date_time.__class__.__name__ != 'str' else trade.date_time }}" class="w-full p-1 border rounded">
-                    </td>
-                    <td><input type="text" name="bias" value="{{ trade.bias }}" class="w-full p-1 border rounded"></td>
-                    <td><input type="number" name="position_size" value="{{ trade.position_size }}" class="w-full p-1 border rounded"></td>
-                    <td><input type="text" name="entry_reason" value="{{ trade.entry_reason }}" class="w-full p-1 border rounded"></td>
-                    <td><input type="text" name="exit_reason" value="{{ trade.exit_reason }}" class="w-full p-1 border rounded"></td>
-                    <td><input type="text" name="outcome" value="{{ trade.outcome }}" class="w-full p-1 border rounded"></td>
-                    <td><input type="number" name="rr" value="{{ trade.rr }}" class="w-full p-1 border rounded"></td>
-                    <td><input type="text" name="notes" value="{{ trade.notes }}" class="w-full p-1 border rounded"></td>
-                    <td><input type="text" name="emotion" value="{{ trade.emotion }}" class="w-full p-1 border rounded"></td>
-                    <td><input type="text" name="trading_plan" value="{{ trade.trading_plan }}" class="w-full p-1 border rounded"></td>
-                    <td><input type="number" name="balance" value="{{ trade.balance }}" class="w-full p-1 border rounded"></td>
-                    <td><input type="number" name="pnl" value="{{ trade.pnl }}" class="w-full p-1 border rounded"></td>
-                    <td><a href="/delete/{{ trade.id }}" class="text-red-600 underline">Delete</a></td>
-                    <td>
-                        <input type="submit" value="Save" class="bg-green-500 text-white px-2 py-1 rounded">
-                        <a href="{{ url_for('index') }}" class="text-gray-600 underline ml-2">Cancel</a>
-                    </td>
-                </form>
-                </tr>
-            {% else %}
-                <tr>
-                    <td class="px-4 py-2">{{ trade.stock }}</td>
-                    <td class="px-4 py-2">{{ trade.date_time }}</td>
-                    <td class="px-4 py-2">{{ trade.bias }}</td>
-                    <td class="px-4 py-2">{{ trade.position_size }}</td>
-                    <td class="px-4 py-2">{{ trade.entry_reason }}</td>
-                    <td class="px-4 py-2">{{ trade.exit_reason }}</td>
-                    <td class="px-4 py-2">{{ trade.outcome }}</td>
-                    <td class="px-4 py-2">{{ trade.rr }}</td>
-                    <td class="px-4 py-2">{{ trade.notes }}</td>
-                    <td class="px-4 py-2">{{ trade.emotion }}</td>
-                    <td class="px-4 py-2">{{ trade.trading_plan }}</td>
-                    <td class="px-4 py-2">{{ trade.balance }}</td>
-                    <td class="px-4 py-2">{{ trade.pnl }}</td>
-                    <td class="px-4 py-2"><a href="/delete/{{ trade.id }}" class="text-red-600 underline">Delete</a></td>
-                    <td class="px-4 py-2"><a href="{{ url_for('index', edit_id=trade.id) }}" class="text-blue-600 underline">Edit</a></td>
-                </tr>
-            {% endif %}
-        {% endfor %}
-        </tbody>
-    </table>
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-100 text-[var(--primary-color)] font-semibold text-left sticky top-0 z-10">
+      <tr>
+        <th class="px-4 py-2">Stock</th>
+        <th class="px-4 py-2">Date & Time</th>
+        <th class="px-4 py-2">Bias</th>
+        <th class="px-4 py-2">Position Size</th>
+        <th class="px-4 py-2">Entry Reason</th>
+        <th class="px-4 py-2">Exit Reason</th>
+        <th class="px-4 py-2">Outcome</th>
+        <th class="px-4 py-2">RR</th>
+        <th class="px-4 py-2">Notes</th>
+        <th class="px-4 py-2">Mental State/Emotions</th>
+        <th class="px-4 py-2">Trading Plan</th>
+        <th class="px-4 py-2">Balance</th>
+        <th class="px-4 py-2">PNL</th>
+        <th class="px-4 py-2">Delete</th>
+        <th class="px-4 py-2">Edit</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      {% for trade in trades %}
+        {% if request.args.get('edit_id') and request.args.get('edit_id')|int == trade.id %}
+          <tr class="bg-yellow-50">
+          <form method="POST" action="?edit_id={{ trade.id }}">
+            <td><input type="text" name="stock" value="{{ trade.stock }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="datetime-local" name="date_time" value="{{ trade.date_time.strftime('%Y-%m-%dT%H:%M') if trade.date_time and trade.date_time.__class__.__name__ != 'str' else trade.date_time }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="text" name="bias" value="{{ trade.bias }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="number" name="position_size" value="{{ trade.position_size }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="text" name="entry_reason" value="{{ trade.entry_reason }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="text" name="exit_reason" value="{{ trade.exit_reason }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="text" name="outcome" value="{{ trade.outcome }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="number" name="rr" value="{{ trade.rr }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="text" name="notes" value="{{ trade.notes }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="text" name="emotion" value="{{ trade.emotion }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="text" name="trading_plan" value="{{ trade.trading_plan }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="number" name="balance" value="{{ trade.balance }}" class="w-full p-1 border rounded" /></td>
+            <td><input type="number" name="pnl" value="{{ trade.pnl }}" class="w-full p-1 border rounded" /></td>
+            <td><a href="/delete/{{ trade.id }}" class="text-red-600 underline">Delete</a></td>
+            <td>
+              <input type="submit" value="Save" class="bg-green-500 text-white px-2 py-1 rounded" />
+              <a href="{{ url_for('index') }}" class="text-gray-600 underline ml-2">Cancel</a>
+            </td>
+          </form>
+          </tr>
+        {% else %}
+          <tr>
+            <td class="px-4 py-2">{{ trade.stock }}</td>
+            <td class="px-4 py-2">{{ trade.date_time }}</td>
+            <td class="px-4 py-2">{{ trade.bias }}</td>
+            <td class="px-4 py-2">{{ trade.position_size }}</td>
+            <td class="px-4 py-2">{{ trade.entry_reason }}</td>
+            <td class="px-4 py-2">{{ trade.exit_reason }}</td>
+            <td class="px-4 py-2">{{ trade.outcome }}</td>
+            <td class="px-4 py-2">{{ trade.rr }}</td>
+            <td class="px-4 py-2">{{ trade.notes }}</td>
+            <td class="px-4 py-2">{{ trade.emotion }}</td>
+            <td class="px-4 py-2">{{ trade.trading_plan }}</td>
+            <td class="px-4 py-2">{{ trade.balance }}</td>
+            <td class="px-4 py-2">{{ trade.pnl }}</td>
+            <td class="px-4 py-2"><a href="/delete/{{ trade.id }}" class="text-red-600 underline">Delete</a></td>
+            <td class="px-4 py-2"><a href="{{ url_for('index', edit_id=trade.id) }}" class="text-blue-600 underline">Edit</a></td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
-<!-- Alpine.js for toggle -->
+<!-- Alpine.js -->
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 {% endblock %}

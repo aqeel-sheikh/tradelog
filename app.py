@@ -34,7 +34,7 @@ def landing():
 def index():
     form = TradeLogForm()
     edit_id = request.args.get('edit_id')
-    trades = Trade.query.filter_by(user_id=current_user.id).all()
+    trades = Trade.query.filter_by(user_id=current_user.id).order_by(Trade.date_time.desc()).all()
     # Inline edit POST
     if request.method == 'POST' and edit_id:
         try:
@@ -109,11 +109,15 @@ def delete_trade(trade_id):
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+        existing_user = User.query.filter_by(email=form.email.data).first()
+        if existing_user:
+            flash('Email already registered. Please log in or use a different email.', 'error')
+            return redirect(url_for('register'))
         hashed_pw = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, password=hashed_pw)
         db.session.add(user)
         db.session.commit()
-        flash('Account created! You can now log in.')
+        flash('Account created! You can now log in.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
@@ -125,10 +129,10 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
-            flash('Logged in successfully!')
+            flash('Logged in successfully!', 'success')
             return redirect(url_for('index'))
         else:
-            flash('Login failed. Check your email and password.')
+            flash('Login failed. Check your email and password.', 'error')
     return render_template('login.html', form=form)
 
 # Logout Route
@@ -200,7 +204,12 @@ def dashboard():
     trades = Trade.query.filter_by(user_id=current_user.id).all()
 
     total_trades = len(trades)
-    total_pnl = sum([t.pnl for t in trades])
+    total_pnl = 0
+    for t in trades:
+        if t.outcome.lower() == "win":
+            total_pnl += t.pnl
+        elif t.outcome.lower() == "loss":
+            total_pnl -= t.pnl
     wins = [t for t in trades if t.outcome.lower() == "win"]
     win_rate = round((len(wins) / total_trades) * 100, 2) if total_trades else 0
     avg_rr = round(sum([t.rr for t in trades]) / total_trades, 2) if total_trades else 0
