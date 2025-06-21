@@ -12,6 +12,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SERVER_NAME'] = '451f-157-48-9-61.ngrok-free.app'
 
 db.init_app(app)
 bcrypt = Bcrypt(app)
@@ -233,19 +234,21 @@ def dashboard():
 def upgrade():
     order_id = str(uuid.uuid4())
     payload = {
-        'order_id':order_id,
-        'order_amount':1.00,
-        'order_currency':'INR',
-        'customer_details':{
-            'customer_id':str(current_user.id),
-            "customer_name": "Trade Log",
-            'customer_email':current_user.email,
-            'customer_phone':'1234567890'
-        },
-        'order_note': 'Premium Upgrade for TradeLog',
-        'return_url': url_for('payment_success', _external=True),
-        'notify_url': url_for('payment_webhook', _external=True)
+    'order_id': order_id,
+    'order_amount': 1.00,
+    'order_currency': 'INR',
+    'customer_details': {
+        'customer_id': str(current_user.id),
+        'customer_name': current_user.username,
+        'customer_email': current_user.email,
+        'customer_phone': '1234567890'
+    },
+    'order_note': 'Premium Upgrade for TradeLog',
+    'order_meta': {
+        'return_url': 'https://451f-157-48-9-61.ngrok-free.app/payment_success',
+        'notify_url': 'https://451f-157-48-9-61.ngrok-free.app/payment_webhook'
     }
+}
 
     headers = {
         'x-api-version': '2022-01-01',
@@ -264,11 +267,12 @@ def upgrade():
         flash('Failed to initiate payment. Try again later', 'error')
         return redirect(url_for('index'))
 
+
 # Payment Webhook Route
 @app.route('/payment_webhook', methods=['POST'])
 def payment_webhook():
     data = request.json
-    print("Webhook received:", data)  # For production, use logging instead
+    print("Webhook received:", data)
     try:
         if data.get('order_status') == 'PAID':
             user_id = int(data['customer_details']['customer_id'])
@@ -289,10 +293,13 @@ def payment_webhook():
 @app.route('/payment_success')
 @login_required
 def payment_success():
-    current_user.is_premium = True
-    db.session.commit()
+    if not current_user.is_premium:
+        # fallback: make premium manually if webhook didn't hit yet
+        current_user.is_premium = True
+        db.session.commit()
     flash("You are now a Premium user!", "success")
     return redirect(url_for('index'))
+
 
 @app.errorhandler(403)
 def forbidden(e):
@@ -310,4 +317,4 @@ with app.app_context():
     db.create_all()
     
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, host='0.0.0.0', port=5000)
