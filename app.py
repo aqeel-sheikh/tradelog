@@ -7,12 +7,13 @@ from datetime import datetime
 import csv, os, requests, uuid
 
 
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SERVER_NAME'] = '451f-157-48-9-61.ngrok-free.app'
+app.config['SERVER_NAME'] = 'tradelog.onrender.com'
+CLIENT_ID = os.environ.get('CLIENT_ID', 'fallback-secret')
+CLIENT_SECRET = os.environ.get('CLIENT_SECRET', 'fallback-secret')
 
 db.init_app(app)
 bcrypt = Bcrypt(app)
@@ -88,6 +89,7 @@ def index():
             )
             db.session.add(new_trade)
             db.session.commit()
+            remain_trades -= 1
             flash('Trade logged successfully!', 'success')
             return redirect(url_for('index'))
         except Exception as e:
@@ -96,6 +98,15 @@ def index():
     if form.errors:
         flash(str(form.errors), 'error')
     return render_template('index.html', trades=trades, form=form)
+
+# Show Remaining Trades for Free Users
+@app.context_processor
+def inject_remain_trades():
+    remain = None
+    if current_user.is_authenticated and not current_user.is_premium:
+        trade_count = Trade.query.filter_by(user_id=current_user.id).count()
+        remain = max(0, 10 - trade_count)
+    return dict(remain_trades=remain)
 
 # Delete Route
 @app.route('/delete/<int:trade_id>')
@@ -235,7 +246,7 @@ def upgrade():
     order_id = str(uuid.uuid4())
     payload = {
     'order_id': order_id,
-    'order_amount': 1.00,
+    'order_amount': 199.00,
     'order_currency': 'INR',
     'customer_details': {
         'customer_id': str(current_user.id),
@@ -245,15 +256,15 @@ def upgrade():
     },
     'order_note': 'Premium Upgrade for TradeLog',
     'order_meta': {
-        'return_url': 'https://451f-157-48-9-61.ngrok-free.app/payment_success',
-        'notify_url': 'https://451f-157-48-9-61.ngrok-free.app/payment_webhook'
+        'return_url': 'https://tradelog-g2ox.onrender.com/payment_success',
+        'notify_url': 'https://tradelog-g2ox.onrender.com/payment_webhook'
     }
 }
 
     headers = {
         'x-api-version': '2022-01-01',
-        'x-client-id': '100137950631bd428354faa956f9731001',
-        'x-client-secret': 'cfsk_ma_prod_09c4ac7f0b95e2b0ae742f9436592249_bc8ddf3e',
+        'x-client-id': CLIENT_ID,
+        'x-client-secret': CLIENT_SECRET,
         'Content-type': 'application/json'
     }
 
