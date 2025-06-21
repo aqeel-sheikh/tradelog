@@ -4,7 +4,9 @@ from flask_bcrypt import Bcrypt
 from models import db, Trade, User
 from forms import TradeLogForm, RegisterForm, LoginForm
 from datetime import datetime
-import csv, os
+import csv, os, requests, uuid
+
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret')
@@ -18,7 +20,7 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 # Landing Page
@@ -38,7 +40,7 @@ def index():
     # Inline edit POST
     if request.method == 'POST' and edit_id:
         try:
-            trade = Trade.query.get(int(edit_id))
+            trade = db.session.get(Trade, int(edit_id))
             if trade and trade.user_id == current_user.id:
                 trade.stock = request.form.get('stock')
                 trade.date_time = datetime.strptime(request.form.get('date_time'), '%Y-%m-%dT%H:%M')
@@ -64,8 +66,8 @@ def index():
         try:
             if not current_user.is_premium:
                 trade_count = Trade.query.filter_by(user_id=current_user.id).count()
-                if trade_count >= 20:
-                    flash('Free users can only add up to 20 trades. Upgrade to premium for unlimited trades!', 'error')
+                if trade_count >= 10:
+                    flash('Free users can only add up to 10 trades. Upgrade to premium for unlimited trades!', 'error')
                     return redirect(url_for('index'))
             new_trade = Trade(
                 stock=form.stock.data,
@@ -98,7 +100,9 @@ def index():
 @app.route('/delete/<int:trade_id>')
 @login_required
 def delete_trade(trade_id):
-    trade = Trade.query.get_or_404(trade_id)
+    trade = db.session.get(Trade, trade_id)
+    if not trade:
+        abort(404)
     db.session.delete(trade)
     db.session.commit()
     flash('Trade deleted successfully!')
@@ -186,12 +190,12 @@ def admin():
     return render_template('admin.html', users=users)
 
 # Upgrade user Route
-@app.route('/upgrade/<int:user_id>', methods=['POST'])
+@app.route('/upgrade_user/<int:user_id>', methods=['POST'])
 @login_required
 def upgrade_user(user_id):
     if not current_user.is_admin:
         abort(403)
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     user.is_premium = True
     db.session.commit()
     flash(f"{user.username} upgraded to Premium.")
@@ -223,6 +227,73 @@ def dashboard():
         last_trade=last_trade
     )
 
+# Upgrade Route to initiate payment
+@app.route('/upgrade', methods=['POST'])
+@login_required
+def upgrade():
+    order_id = str(uuid.uuid4())
+    payload = {
+        'order_id':order_id,
+        'order_amount':1.00,
+        'order_currency':'INR',
+        'customer_details':{
+            'customer_id':str(current_user.id),
+            "customer_name": "Trade Log",
+            'customer_email':current_user.email,
+            'customer_phone':'1234567890'
+        },
+        'order_note': 'Premium Upgrade for TradeLog',
+        'return_url': url_for('payment_success', _external=True),
+        'notify_url': url_for('payment_webhook', _external=True)
+    }
+
+    headers = {
+        'x-api-version': '2022-01-01',
+        'x-client-id': '100137950631bd428354faa956f9731001',
+        'x-client-secret': 'cfsk_ma_prod_09c4ac7f0b95e2b0ae742f9436592249_bc8ddf3e',
+        'Content-type': 'application/json'
+    }
+
+    res = requests.post('https://api.cashfree.com/pg/orders', json=payload, headers=headers)
+    print(res.status_code, res.text)
+    data = res.json()
+
+    if res.status_code == 200 and data.get('order_status') == 'ACTIVE' and data.get('payment_link'):
+        return redirect(data['payment_link'])
+    else:
+        flash('Failed to initiate payment. Try again later', 'error')
+        return redirect(url_for('index'))
+
+# Payment Webhook Route
+@app.route('/payment_webhook', methods=['POST'])
+def payment_webhook():
+    data = request.json
+    print("Webhook received:", data)  # For production, use logging instead
+    try:
+        if data.get('order_status') == 'PAID':
+            user_id = int(data['customer_details']['customer_id'])
+            user = db.session.get(User, user_id)
+            if user:
+                user.is_premium = True
+                db.session.commit()
+                print(f"User {user_id} upgraded to premium.")
+            else:
+                print(f"User {user_id} not found.")
+        else:
+            print("Order status not PAID.")
+    except Exception as e:
+        print("Webhook error:", e)
+    return '', 200
+
+# Make User Premium Route
+@app.route('/payment_success')
+@login_required
+def payment_success():
+    current_user.is_premium = True
+    db.session.commit()
+    flash("You are now a Premium user!", "success")
+    return redirect(url_for('index'))
+
 @app.errorhandler(403)
 def forbidden(e):
     return render_template('403.html'), 403
@@ -239,4 +310,4 @@ with app.app_context():
     db.create_all()
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
