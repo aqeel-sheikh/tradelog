@@ -135,7 +135,7 @@ def upgrade():
     order_id = str(uuid.uuid4())
     payload = {
         'order_id': order_id,
-        'order_amount': 1.00,
+        'order_amount': 199.00,
         'order_currency': 'INR',
         'customer_details': {
             'customer_id': str(current_user.id),
