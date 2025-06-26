@@ -1,105 +1,141 @@
-# TradeLog
+# 📈 TradeLog – Trading Journal SaaS (Flask)
 
-TradeLog is a modern SaaS web application for traders to log, review, and improve their trading performance. Built with Flask, it offers a secure, user-friendly platform for managing trade journals, analyzing performance, and upgrading to premium features.
+**TradeLog** is a modern SaaS web application for traders to log, review, and improve their trading performance. Built with Flask, it offers a secure, user-friendly platform to manage trade journals, analyze patterns, and upgrade to premium features with ease.
 
-## Features
+---
 
-- **User Authentication:** Secure registration, login, and logout using Flask-Login and Flask-Bcrypt.
-- **Trade Logging:** Add, edit (inline), and delete trades with detailed fields (stock, date & time, bias, position size, entry/exit reason, outcome, R:R, notes, emotion, trading plan, balance, PNL).
-- **Free & Premium Tiers:** Free users can log up to 10 trades; premium users have unlimited access.
-- **Premium Upgrade:** Integrated payment gateway (Cashfree) for seamless premium upgrades.
-- **CSV Export:** Premium users can export their trades as CSV files.
-- **Admin Panel:** Manage users and view all registered accounts.
-- **Custom Error Pages:** Friendly 403, 404, and 500 error pages.
-- **Responsive UI:** Clean, modern design using Tailwind CSS.
-- **Blueprint Architecture:** Modular codebase with blueprints for main, auth, trading, and errors.
-- **Database:** SQLAlchemy ORM with SQLite (default).
-- **Deployment Ready:** Easily deployable on Render.com or any WSGI-compatible host.
+## 💭 Why I Built TradeLog
 
-## Screenshots
-![Landing Page](screenshots/image.png), 
-![Home/Index Page](screenshots/image-1.png)
-![Dashboard](screenshots/image-2.png),
-![Trade Form](screenshots/image-3.png),
-![Error pages layout](screenshots/image-4.png),
-![Admin Panel](screenshots/image-5.png)
+As a former trader and current developer, I set out to build a platform that would help me reflect on past trades, understand my mindset, and grow over time. What began as a personal tool evolved into TradeLog — a scalable SaaS built to help traders cultivate discipline and consistency.
 
-## Getting Started
+---
 
-### Prerequisites
+## 🚀 Features
+
+- 🔐 **User Authentication** – Secure registration, login, and logout using Flask-Login and Flask-Bcrypt.
+- 🧾 **Trade Logging** – Add, inline edit, and delete trades with detailed fields: Stock, Date & Time, Bias, Position Size, Entry/Exit Reason, Outcome, R:R, Notes, Emotion, Plan, Balance, PNL.
+- 💡 **Free vs Premium**: Free users can log up to 10 trades. Premium users get unlimited trades + CSV export.
+- 💳 **Premium Upgrade** – Integrated **Cashfree** payment gateway for smooth upgrades.
+- 📤 **CSV Export** – Premium users can export trades for analysis.
+- ⚙️ **Admin Panel** – Manage users and view registered accounts.
+- ❌ **Custom Error Pages** – Friendly 403, 404, and 500 error templates.
+- 🎨 **Responsive UI** – Built with Tailwind CSS for a modern, clean, mobile-first design.
+- 🧱 **Blueprint Architecture** – Modular codebase with clear separation (`auth`, `main`, `trading`, `errors`).
+- 🗄️ **Database** – SQLAlchemy ORM with SQLite (default).
+- ☁️ **Deployment Ready** – Easily deployable on Render.com or any WSGI-compatible host.
+
+---
+
+## 📸 Screenshots
+
+**Landing Page**  
+![Landing Page](screenshots/image.png)
+
+**Home / Index**  
+![Home](screenshots/image-1.png)
+
+**Dashboard**  
+![Dashboard](screenshots/image-2.png)
+
+**Trade Form**  
+![Form](screenshots/image-3.png)
+
+**Error Pages**  
+![Error](screenshots/image-4.png)
+
+**Admin Panel**  
+![Admin](screenshots/image-5.png)
+
+---
+
+## 🛠️ Getting Started
+
+### ✅ Prerequisites
+
 - Python 3.8+
-- pip
+- `pip` (Python package manager)
 
-### Installation
+### 📦 Installation
+
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/tradelog.git
+   git clone git clone https://github.com/aqeel-sheikh/tradelog.git
+
    cd tradelog
    ```
 2. **Create a virtual environment:**
    ```bash
-   python -m venv myenv
-   source myenv/bin/activate  # On Windows: myenv\Scripts\activate
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 4. **Set environment variables:**
-   - `SECRET_KEY`: Flask secret key
-   - `CLIENT_ID`, `CLIENT_SECRET`: Cashfree API credentials
-   - (Optional) `DATABASE_URL` for production
-
+   Create a `.env` file in the root directory:
+   ```ini
+   SECRET_KEY=your-secret-key
+   CASHFREE_APP_ID=your-cashfree-app-id
+   CASHFREE_SECRET_KEY=your-cashfree-secret
+   CASHFREE_STAGE=TEST  # or PRODUCTION
+   DATABASE_URL=sqlite:///tradelog.db  # Optional for local use
+   ```
 5. **Run the app locally:**
    ```bash
    python run.py
    ```
-   Visit [http://localhost:5000](http://localhost:5000)
+   Then visit [http://localhost:5000](http://localhost:5000)
 
-### Deployment (Render.com)
-- Set the start command to:
-  ```
-  gunicorn run:app
-  ```
-- Add environment variables in the Render dashboard.
+### 🌐 Deployment (Render.com)
 
-## Project Structure
+1. Push your code to GitHub.
+2. Create a new Web Service on Render.
+3. Set the start command:
+   ```bash
+   gunicorn run:app
+   ```
+4. Add the environment variables from your `.env` file in the Render dashboard.
+
+## 📁 Project Structure
 ```
 tradelog/
-  ├── auth/
-  ├── errors/
-  ├── main/
-  ├── trading/
-  ├── templates/
-  ├── static/
-  ├── models.py
-  ├── extensions.py
-  ├── config.py
-  ├── __init__.py
+├── auth/
+├── errors/
+├── main/
+├── trading/
+├── templates/
+├── static/
+├── models.py
+├── extensions.py
+├── config.py
+├── __init__.py
 run.py
 requirements.txt
+.env (not committed)
 ```
 
-## Configuration
-- All configuration is managed in `tradelog/config.py`.
-- Use environment variables for sensitive data.
+## ⚙️ Configuration
+- All configuration is managed in `config.py`.
+- Sensitive data (like keys and passwords) should be stored in environment variables, not hardcoded.
 
-## Usage
-- Register a new account or log in.
+## 🙋‍♂️ Usage
+- Register or log in.
 - Add, edit, or delete trades from your dashboard.
 - Upgrade to premium for unlimited trades and CSV export.
-- Admins can manage users from the admin panel.
+- Admins can manage users via the admin panel.
 
-## Contributing
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+## 🤝 Contributing
+Pull requests are welcome! For major changes, open an issue first to discuss what you’d like to contribute.
 
+## 👤 Author
+- Aqeel Sheikh  
+  GitHub: [@aqeel-sheikh](https://github.com/aqeel-sheikh)  
+  📧 sheikhakeelw01@gmail.com
 
-## Author
-- Aqeel Sheikh ([@aqeel-sheikh](https://github.com/aqeel-sheikh))
-- Email: sheikhakeelw01@gmail.com
-
-## License
-[MIT](LICENSE)
+## 📄 License
+This project is licensed under the [MIT License](LICENSE)
 
 ---
+
 _TradeLog – Your personal trading companion._
