@@ -17,8 +17,12 @@ TradeLog is a modern SaaS web application for traders to log, review, and improv
 - **Deployment Ready:** Easily deployable on Render.com or any WSGI-compatible host.
 
 ## Screenshots
-
-> _Add screenshots of the landing page, dashboard, trade form, and error pages here._
+![Landing Page](screenshots/image.png), 
+![Home/Index Page](screenshots/image-1.png)
+![Dashboard](screenshots/image-2.png),
+![Trade Form](screenshots/image-3.png),
+![Error pages layout](screenshots/image-4.png),
+![Admin Panel](screenshots/image-5.png)
 
 ## Getting Started
 
